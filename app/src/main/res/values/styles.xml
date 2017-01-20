@@ -22,10 +22,10 @@
 
     <style name="LoginButton" parent="Base.Widget.AppCompat.Button">
         <item name="android:height">40dp</item>
-        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="backgroundTint">@color/colorAccent</item>
         <item name="android:textSize">@dimen/large_txt_size</item>
         <item name="android:textAllCaps">true</item>
-        <item name="colorButtonNormal">@color/colorPrimary</item>
+        <item name="colorButtonNormal">@color/colorAccent</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:clickable">true</item>
 
