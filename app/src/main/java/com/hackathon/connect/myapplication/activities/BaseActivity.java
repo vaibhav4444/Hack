@@ -14,6 +14,7 @@ import com.hackathon.connect.myapplication.common.app.ApplicationClass;
 import com.hackathon.connect.myapplication.common.constants.Constants;
 import com.hackathon.connect.myapplication.common.prefs.Prefs;
 import com.hackathon.connect.myapplication.helper.PermissionsHelper;
+import com.hackathon.connect.myapplication.utils.FuntionUtils;
 
 /**
  * Created by vaibhav on 20/1/17.
@@ -64,11 +65,14 @@ public abstract class BaseActivity extends AppCompatActivity {
                     //launchMainActivity(false);
                 }
                 else{
-                    //FunctionUtils.showDialogForReadPermissionDenied(PermissionActivity.this);
+                    FuntionUtils.showDialogForReadPermissionDenied(this);
                 }
             }
             // launch main activity/ disclaimer activity irrespective of permission given or not.
 
         }
+    }
+    public void requestPermissions(){
+        mPermissionHelper.checkPermissionStatus();
     }
 }
