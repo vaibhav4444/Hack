@@ -125,7 +125,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/medium_margin"
-            android:text="@string/register" />
+            android:text="@string/register"
+                android:onClick="onClick"/>
 
         </LinearLayout>
 

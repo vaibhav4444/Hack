@@ -9,6 +9,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.hackathon.connect.myapplication.R;
+import com.hackathon.connect.myapplication.utils.LocationUtility;
 
 import java.util.ArrayList;
 
@@ -21,6 +22,7 @@ public class SignUpScreen extends BaseActivity{
     private boolean isStatic = false;
     private ArrayList<EditText> arrayListEditText;
     private CheckBox chkIsStatic;
+    private LocationUtility mLocationUtility;
 
     @Override
     protected int getLayoutId() {
@@ -30,6 +32,7 @@ public class SignUpScreen extends BaseActivity{
     @Override
     protected void initViews(View mView) {
         arrayListEditText = new ArrayList<EditText>();
+        mLocationUtility = LocationUtility.getInstance(this);
         edtFName = (EditText) mView.findViewById(R.id.edt_firstName);
         edtLName = (EditText) mView.findViewById(R.id.edt_lastName);
         edtEmail = (EditText) mView.findViewById(R.id.edt_email);
