@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.content.res.Resources;
 
 import com.hackathon.connect.myapplication.R;
+import com.hackathon.connect.myapplication.activities.BaseActivity;
+import com.hackathon.connect.myapplication.helper.PermissionsHelper;
 
 /**
  * Created by vaibhav.singhal on 1/20/2017.
@@ -32,9 +34,10 @@ public class FuntionUtils {
         dialogBuilder.setNegativeButton("retry", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
-               /* if(activity instanceof  PermissionActivity){
-                    ((PermissionActivity)activity).requestPermissions();
-                } */
+
+               if(activity instanceof BaseActivity){
+                    ((BaseActivity)activity).requestPermissions();
+                }
             }
         });
 
