@@ -25,5 +25,11 @@
         app:floatingSearch_leftActionMode="showHamburger"
         app:floatingSearch_menu="@menu/menu_type"
         app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/loginRegister"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/search_view_inset"/>
 
 </RelativeLayout>
