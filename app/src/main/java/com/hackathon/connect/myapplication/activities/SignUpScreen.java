@@ -48,6 +48,7 @@ public class SignUpScreen extends BaseActivity{
         arrayListEditText.add(edtLName);
         arrayListEditText.add(edtMobile);
         arrayListEditText.add(edtType);
+        //mPermissionHelper.re
 
     }
     public void onClick(View view){

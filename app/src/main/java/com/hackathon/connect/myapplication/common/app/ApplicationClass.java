@@ -2,6 +2,7 @@ package com.hackathon.connect.myapplication.common.app;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.Build;
 import android.support.multidex.MultiDex;
 
 import com.hackathon.connect.myapplication.common.prefs.Prefs;
@@ -30,5 +31,9 @@ public class ApplicationClass extends Application {
     }
     public Prefs getPrefs(){
         return mPref;
+    }
+    public boolean isNeedPermission(){
+        boolean needPermission = Build.VERSION.SDK_INT> Build.VERSION_CODES.LOLLIPOP_MR1;
+        return needPermission;
     }
 }
