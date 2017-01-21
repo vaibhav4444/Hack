@@ -13,6 +13,7 @@
     <string name="isStatic">Is Static</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_login">Sign in</string>
+    <string name="updateLocation">Update location as move</string>
 
     <!-- Strings related to login -->
     <string name="prompt_mobile">Mobile No.</string>

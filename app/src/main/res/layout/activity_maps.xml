@@ -11,6 +11,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.hackathon.connect.myapplication.activities.MapsActivity" />
+    <CheckBox
+        android:id="@+id/idChkUpdateLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="@string/updateLocation"
+        android:layout_alignParentTop="true"
+        android:visibility="gone"/>
     <com.arlib.floatingsearchview.FloatingSearchView
         android:layout_alignParentTop="true"
         android:id="@+id/floating_search_view"

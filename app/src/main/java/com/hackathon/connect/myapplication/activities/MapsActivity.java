@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Toast;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
@@ -36,6 +37,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button btnLoginLogout;
     private FloatingSearchView mFloatingSearchView;
     private MongoLabUtil mMongoUtil;
+    private CheckBox mChkUpdateLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +47,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mLocationUtility.setOnLocationUpdateListener(this);
         mFloatingSearchView = (FloatingSearchView) findViewById(R.id.floating_search_view) ;
         mMongoUtil = new MongoLabUtil();
+        mChkUpdateLocation = (CheckBox) findViewById(R.id.idChkUpdateLocation);
         Intent intent = getIntent();
         if(intent != null && intent.getExtras() != null){
             isLaunchedFromLogin = intent.getBooleanExtra(Constants.IS_LAUNCHED_FROM_LOGIN, false);
         }
         btnLoginLogout = (Button) findViewById(R.id.idBtnLogin);
         if(isLaunchedFromLogin){
+            mChkUpdateLocation.setVisibility(View.VISIBLE);
             btnLoginLogout.setText(getString(R.string.logout));
             mFloatingSearchView.setVisibility(View.GONE);
         }
@@ -75,9 +79,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             JSONObject object = new JSONObject(output);
                             boolean isSuccess = object.getBoolean(Constants.STR_IS_SUCCESS);
                             if(isSuccess){
+                                isLaunchedFromLogin = false;
                                 Toast.makeText(MapsActivity.this, "Logout successful", Toast.LENGTH_LONG).show();
                                 mFloatingSearchView.setVisibility(View.VISIBLE);
                                 btnLoginLogout.setText(getString(R.string.loginRegister));
+                                mChkUpdateLocation.setVisibility(View.GONE);
                             }
 
                         } catch (JSONException e) {
