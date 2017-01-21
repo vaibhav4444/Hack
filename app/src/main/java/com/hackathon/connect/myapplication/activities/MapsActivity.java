@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
@@ -15,6 +17,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.hackathon.connect.myapplication.R;
@@ -24,10 +27,13 @@ import com.hackathon.connect.myapplication.listener.AsyncResponse;
 import com.hackathon.connect.myapplication.listener.ILocationUpdates;
 import com.hackathon.connect.myapplication.utils.FuntionUtils;
 import com.hackathon.connect.myapplication.utils.LocationUtility;
+import com.hackathon.connect.myapplication.utils.MapUtils;
 import com.hackathon.connect.myapplication.utils.MongoLabUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, ILocationUpdates {
 
@@ -38,6 +44,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FloatingSearchView mFloatingSearchView;
     private MongoLabUtil mMongoUtil;
     private CheckBox mChkUpdateLocation;
+    private Circle mCircle;
+    private SeekBar seekbar_map;
+    private TextView txt_seekbar_val;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +57,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mFloatingSearchView = (FloatingSearchView) findViewById(R.id.floating_search_view) ;
         mMongoUtil = new MongoLabUtil();
         mChkUpdateLocation = (CheckBox) findViewById(R.id.idChkUpdateLocation);
+        seekbar_map = (SeekBar) findViewById(R.id.seekbar_map);
+        seekbar_map.setOnSeekBarChangeListener(seekBarChangeListener);
+        txt_seekbar_val = (TextView) findViewById(R.id.txt_seekbar_val);
         Intent intent = getIntent();
         if(intent != null && intent.getExtras() != null){
             isLaunchedFromLogin = intent.getBooleanExtra(Constants.IS_LAUNCHED_FROM_LOGIN, false);
@@ -132,6 +144,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LatLng latLng = new  LatLng(location.getLatitude(), location.getLongitude());
             mMap.addMarker(new MarkerOptions().position(latLng).title("Marker in Sydney"));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,zoomLevel));
+            mCircle = drawCircle(latLng,100);
+            if(mCircle!=null) {
+                MapUtils.getCircleIntoView(mMap, MapUtils.boundsWithCenterAndLatLngDistance(mCircle.getCenter(), (float) mCircle.getRadius(), (float) mCircle.getRadius()));
+            }
         }
     }
 
@@ -141,5 +157,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mLocationUtility.stopLocationUpdates();
         }
         super.onDestroy();
+    }
+
+    /**
+     * Radius seekbar change listener
+     */
+    SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            mCircle = drawCircle(seekBar.getProgress());
+            if(mCircle!=null) {
+                MapUtils.getCircleIntoView(mMap, MapUtils.boundsWithCenterAndLatLngDistance(mCircle.getCenter(), (float) mCircle.getRadius(), (float) mCircle.getRadius()));
+            }
+            txt_seekbar_val.setText(String.format(Locale.getDefault(),"%d",seekBar.getProgress()));
+        }
+    };
+
+    private Circle drawCircle(int radius)
+    {
+        if(mCircle == null ) return null;
+        return drawCircle(mCircle.getCenter(),radius);
+    }
+
+    private Circle drawCircle(LatLng latLng, int radius)
+    {
+        if(mCircle!=null) mCircle.remove();
+        if(latLng == null) return null;
+        int radiusInMeters = MapUtils.convertMilesIntoMeters(radius);
+        return MapUtils.drawCircle(this, mMap, latLng, radiusInMeters);
+
     }
 }
