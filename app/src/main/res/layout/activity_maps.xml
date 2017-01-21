@@ -26,6 +26,7 @@
         app:floatingSearch_menu="@menu/menu_type"
         app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
     <Button
+        android:id="@+id/idBtnLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/loginRegister"

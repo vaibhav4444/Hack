@@ -19,4 +19,11 @@ public class Constants {
     public  static final int REQUEST_CHECK_SETTINGS = 0x1;
     public  static final String STR_IS_SUCCESS = "isSucess";
     public static final String ADDRESS = "&address=";
+    public static final String URL_LOGIN = BASE_URL + "VendorRegistration/Login?";
+    public static final String URL_LOGOUT = BASE_URL  + "VendorRegistration/Logout?vendorId=";
+    public static final String CURRENT_LATITUDE = "&current_latitude=";
+    public static final String CURRENT_LONGITUDE = "&current_longitude=";
+    public static final String IS_STATIC_UPDATE = "&is_static_update=";
+    public static final String IS_LAUNCHED_FROM_LOGIN = "isLaunchedFromLogin";
+
 }

@@ -37,7 +37,7 @@ public class LocationUtility implements LocationListener, GoogleApiClient.Connec
      */
     private static GoogleApiClient mGoogleApiClient;
     private  Context mContext;
-    private Location mCurrentLocation;
+    private static Location mCurrentLocation;
     private Location mLastLocation = null;
     private   static LocationUtility mLocationUtility = null;
     // value will be set to true from startLocation updates & false from stopLocationUpdates
@@ -186,7 +186,7 @@ public class LocationUtility implements LocationListener, GoogleApiClient.Connec
         }
     }
 
-    public Location getLocation(){
+    public static Location getLocation(){
         return mCurrentLocation;
     }
 

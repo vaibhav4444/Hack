@@ -35,4 +35,5 @@
     <string name="alert">Alert</string>
     <string name="congratulations">Congratulations</string>
     <string name="successReg">Successfully registered. Please login to get business.</string>
+    <string name="logout">LOGOUT</string>
 </resources>

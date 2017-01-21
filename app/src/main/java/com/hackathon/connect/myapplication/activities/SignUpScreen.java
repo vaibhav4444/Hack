@@ -96,7 +96,7 @@ public class SignUpScreen extends BaseActivity{
                         FuntionUtils.showRegisterSuccess(SignUpScreen.this);
                     }
                     else {
-                        String message = object.getString("message");
+                        String message = object.getString("Message");
                         if(TextUtils.isEmpty(message)){
                             message = "Failed to register user. Please try again with different number.";
                         }
