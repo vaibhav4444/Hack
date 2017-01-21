@@ -15,6 +15,7 @@ import com.hackathon.connect.myapplication.common.constants.Constants;
 import com.hackathon.connect.myapplication.common.prefs.Prefs;
 import com.hackathon.connect.myapplication.helper.PermissionsHelper;
 import com.hackathon.connect.myapplication.utils.FuntionUtils;
+import com.hackathon.connect.myapplication.utils.MongoLabUtil;
 
 /**
  * Created by vaibhav on 20/1/17.
@@ -25,11 +26,13 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected Prefs prefs;
     protected PermissionsHelper mPermissionHelper;
     private boolean mShowRationale = false;
+    protected MongoLabUtil mongoLabUtil;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base_without_toolbar);
         mPermissionHelper = new PermissionsHelper(this);
+        mongoLabUtil = new MongoLabUtil();
         FrameLayout contentLayout = (FrameLayout) findViewById(R.id.content_detail);
         mInflatedView = getLayoutInflater().inflate(getLayoutId(), null);
         contentLayout.addView(mInflatedView);

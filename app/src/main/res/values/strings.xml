@@ -32,4 +32,7 @@
     <string name="permissionDenied">Permission Denied</string>
     <string name="readPermissionDenied">Without location permission application will not work properly.</string>
     <string name="loginRegister">Login as vendor</string>
+    <string name="alert">Alert</string>
+    <string name="congratulations">Congratulations</string>
+    <string name="successReg">Successfully registered. Please login to get business.</string>
 </resources>

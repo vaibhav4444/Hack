@@ -1,5 +1,6 @@
 package com.hackathon.connect.myapplication.activities;
 
+import android.app.ProgressDialog;
 import android.location.Location;
 import android.text.TextUtils;
 import android.view.ContextMenu;
@@ -11,7 +12,12 @@ import android.widget.EditText;
 
 import com.hackathon.connect.myapplication.R;
 import com.hackathon.connect.myapplication.common.constants.Constants;
+import com.hackathon.connect.myapplication.listener.AsyncResponse;
+import com.hackathon.connect.myapplication.utils.FuntionUtils;
 import com.hackathon.connect.myapplication.utils.LocationUtility;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -20,7 +26,7 @@ import java.util.ArrayList;
  */
 
 public class SignUpScreen extends BaseActivity{
-    private EditText edtFName, edtLName, edtEmail, edtMobile, edtType;
+    private EditText edtFName, edtLName, edtEmail, edtMobile, edtType, edtPassword;
     private boolean isStatic = false;
     private ArrayList<EditText> arrayListEditText;
     private CheckBox chkIsStatic;
@@ -36,12 +42,13 @@ public class SignUpScreen extends BaseActivity{
     @Override
     protected void initViews(View mView) {
         arrayListEditText = new ArrayList<EditText>();
-        mLocationUtility = LocationUtility.getInstance(this);
+        mLocationUtility = new LocationUtility(this);
         edtFName = (EditText) mView.findViewById(R.id.edt_firstName);
         edtLName = (EditText) mView.findViewById(R.id.edt_lastName);
         edtEmail = (EditText) mView.findViewById(R.id.edt_email);
         edtMobile = (EditText) mView.findViewById(R.id.edt_mobile);
         edtType = (EditText) mView.findViewById(R.id.edt_type);
+        edtPassword = (EditText) mView.findViewById(R.id.edt_password);
         chkIsStatic = (CheckBox) mView.findViewById(R.id.chk_isStatic);
         registerForContextMenu(edtType);
         edtType.setOnClickListener(new View.OnClickListener() {
@@ -55,6 +62,7 @@ public class SignUpScreen extends BaseActivity{
         arrayListEditText.add(edtLName);
         arrayListEditText.add(edtMobile);
         arrayListEditText.add(edtType);
+        arrayListEditText.add(edtPassword);
         //mPermissionHelper.re
 
     }
@@ -74,8 +82,32 @@ public class SignUpScreen extends BaseActivity{
             mLatitude =  "" + location.getLatitude();
             mLongitude = "" + location.getLongitude();
         }
-        url = Constants.REGISTRATION_URL+Constants.F_NAME+getStringFromEditText(edtFName) + Constants.L_NAME + getStringFromEditText(edtLName) + Constants.EMAIL + getStringFromEditText(edtEmail) + Constants.MOBILE + getStringFromEditText(edtMobile) +
-                Constants.LATITUDE + mLatitude + Constants.LATITUDE + mLongitude + Constants.CATEGORY_ID + getStringFromEditText(edtType);
+        url = Constants.REGISTRATION_URL+Constants.F_NAME+getStringFromEditText(edtFName) + Constants.L_NAME + getStringFromEditText(edtLName) + Constants.MOBILE + getStringFromEditText(edtMobile) + Constants.EMAIL + getStringFromEditText(edtEmail) +
+                 Constants.CATEGORY_ID + getStringFromEditText(edtType) + Constants.LATITUDE + mLatitude + Constants.LONGITUDE + mLongitude  + Constants.PASSWORD + getStringFromEditText(edtPassword) + Constants.ADDRESS + "abc";
+        final ProgressDialog dialog = FuntionUtils.showProgressSialog(this);
+        mongoLabUtil.getData(new AsyncResponse() {
+            @Override
+            public void processFinish(String output) {
+                dialog.hide();
+                try {
+                    JSONObject object = new JSONObject(output);
+                    boolean isSuccess = object.getBoolean(Constants.STR_IS_SUCCESS);
+                    if(isSuccess){
+                        FuntionUtils.showRegisterSuccess(SignUpScreen.this);
+                    }
+                    else {
+                        String message = object.getString("message");
+                        if(TextUtils.isEmpty(message)){
+                            message = "Failed to register user. Please try again with different number.";
+                        }
+                        FuntionUtils.showAlertDialog(SignUpScreen.this, message);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, url);
 
 
     }

@@ -17,4 +17,6 @@ public class Constants {
     public static final String BASE_URL = "http://ion.net.in/api/";
     public static final String REGISTRATION_URL = BASE_URL + "VendorRegistration/Register?";
     public  static final int REQUEST_CHECK_SETTINGS = 0x1;
+    public  static final String STR_IS_SUCCESS = "isSucess";
+    public static final String ADDRESS = "&address=";
 }

@@ -1,6 +1,7 @@
 package com.hackathon.connect.myapplication.utils;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,6 +18,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.hackathon.connect.myapplication.common.app.ApplicationClass;
 import com.hackathon.connect.myapplication.listener.ILocationUpdates;
 
 
@@ -34,25 +36,25 @@ public class LocationUtility implements LocationListener, GoogleApiClient.Connec
      * Provides the entry point to Google Play services.
      */
     private static GoogleApiClient mGoogleApiClient;
-    private static Context mContext;
+    private  Context mContext;
     private Location mCurrentLocation;
     private Location mLastLocation = null;
-    private static LocationUtility mLocationUtility = null;
+    private   static LocationUtility mLocationUtility = null;
     // value will be set to true from startLocation updates & false from stopLocationUpdates
-    public static boolean isLocationUpdatesOn = false;
-    private static LocationUtility mInstance;
+    public  boolean isLocationUpdatesOn = false;
+    private  LocationUtility mInstance;
 
     //> make object of interface ILocationUpdates
     private ILocationUpdates mILocationUpdatesListener = null;
 
-    private void LocationUtility() {
+    public  LocationUtility(Context context) {
+        mContext = context;
         mInstance = this;
+        mLocationUtility = this;
+        getInstance(mContext);
     }
 
-    public synchronized static LocationUtility getInstance(Context context) {
-        if (mLocationUtility == null) {
-            mLocationUtility = new LocationUtility();
-        }
+    private  LocationUtility getInstance(Context context) {
         mContext = context;
         if (mLocationRequest == null) {
             createLocationRequest();
@@ -125,8 +127,8 @@ public class LocationUtility implements LocationListener, GoogleApiClient.Connec
             createLocationRequest();
         }
         //TODO: check for permission if not given fire local broadcast & return
-        if (LocationUtility.isLocationUpdatesOn == false) {
-            LocationUtility.isLocationUpdatesOn = true;
+        if (isLocationUpdatesOn == false) {
+            isLocationUpdatesOn = true;
             if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -207,7 +209,7 @@ public class LocationUtility implements LocationListener, GoogleApiClient.Connec
         if(isGoogleClientConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
-        LocationUtility.isLocationUpdatesOn = false;
+        isLocationUpdatesOn = false;
     }
 
 
@@ -264,12 +266,12 @@ public class LocationUtility implements LocationListener, GoogleApiClient.Connec
     * Builds a GoogleApiClient. Uses the {@code #addApi} method to request the
     * LocationServices API.
     */
-    public synchronized GoogleApiClient getGoogleApiClientInstance(){
+    public static synchronized GoogleApiClient getGoogleApiClientInstance(){
         if(mGoogleApiClient == null){
-            mGoogleApiClient = new GoogleApiClient.Builder(mContext)
+            mGoogleApiClient = new GoogleApiClient.Builder(ApplicationClass.getAppInstance())
                     .addApi(LocationServices.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
+                    .addConnectionCallbacks(mLocationUtility)
+                    .addOnConnectionFailedListener(mLocationUtility)
                     .build();
         }
         return mGoogleApiClient;

@@ -2,7 +2,9 @@ package com.hackathon.connect.myapplication.utils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.res.Resources;
 
@@ -17,6 +19,7 @@ import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.hackathon.connect.myapplication.R;
 import com.hackathon.connect.myapplication.activities.BaseActivity;
+import com.hackathon.connect.myapplication.activities.LoginActivity;
 import com.hackathon.connect.myapplication.common.constants.Constants;
 import com.hackathon.connect.myapplication.helper.PermissionsHelper;
 
@@ -92,7 +95,7 @@ public class FuntionUtils {
     private static void checkLocationSettings(final Activity context, LocationSettingsRequest locationSettingsRequest) {
 
         PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(LocationUtility.getInstance(context).getGoogleApiClientInstance(), locationSettingsRequest);
+                LocationServices.SettingsApi.checkLocationSettings(LocationUtility.getGoogleApiClientInstance(), locationSettingsRequest);
         /**
          * The callback invoked when
          * {@link com.google.android.gms.location.SettingsApi#checkLocationSettings(GoogleApiClient,
@@ -133,6 +136,51 @@ public class FuntionUtils {
                 // to pass Result object back to caller.
             }
         });
+    }
+    public static ProgressDialog showProgressSialog(Activity activity){
+        ProgressDialog progressdialog = new ProgressDialog(activity);
+        progressdialog.setMessage("Please Wait....");
+        progressdialog.show();
+        return progressdialog;
+    }
+    public static void showAlertDialog(final Activity activity, String message) {
+        Resources resources = activity.getResources();
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
+        dialogBuilder.setTitle(resources.getString(R.string.alert));
+        dialogBuilder.setMessage(message);
+
+        dialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+
+
+
+        AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
+    public static void showRegisterSuccess(final Activity activity) {
+        Resources resources = activity.getResources();
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
+        dialogBuilder.setTitle(resources.getString(R.string.congratulations));
+        dialogBuilder.setMessage(resources.getString(R.string.successReg));
+
+        dialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                Intent intent = new Intent(activity, LoginActivity.class);
+                activity.startActivity(intent);
+                dialog.cancel();
+                activity.finish();
+            }
+        });
+
+
+
+        AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.show();
     }
 
 }
