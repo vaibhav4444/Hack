@@ -1,5 +1,6 @@
 package com.hackathon.connect.myapplication.activities;
 
+import android.location.Location;
 import android.text.TextUtils;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
@@ -9,6 +10,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.hackathon.connect.myapplication.R;
+import com.hackathon.connect.myapplication.common.constants.Constants;
 import com.hackathon.connect.myapplication.utils.LocationUtility;
 
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ public class SignUpScreen extends BaseActivity{
     private ArrayList<EditText> arrayListEditText;
     private CheckBox chkIsStatic;
     private LocationUtility mLocationUtility;
+    private String mLatitude, mLongitude;
+    private String url;
 
     @Override
     protected int getLayoutId() {
@@ -65,9 +69,19 @@ public class SignUpScreen extends BaseActivity{
             }
             // make web-call
         }
+        Location location = mLocationUtility.getLocation();
+        if(location != null){
+            mLatitude =  "" + location.getLatitude();
+            mLongitude = "" + location.getLongitude();
+        }
+        url = Constants.REGISTRATION_URL+Constants.F_NAME+getStringFromEditText(edtFName) + Constants.L_NAME + getStringFromEditText(edtLName) + Constants.EMAIL + getStringFromEditText(edtEmail) + Constants.MOBILE + getStringFromEditText(edtMobile) +
+                Constants.LATITUDE + mLatitude + Constants.LATITUDE + mLongitude + Constants.CATEGORY_ID + getStringFromEditText(edtType);
+
 
     }
-
+    private String getStringFromEditText(EditText editText){
+        return editText.getText().toString();
+    }
     /**
      * will return false if validation fail.
      * @param editText

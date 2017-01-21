@@ -65,6 +65,9 @@ public class LocationUtility implements LocationListener, GoogleApiClient.Connec
         if (!isGoogleClientConnected()) {
             connectGoogleClient();
         }
+        else{
+            mInstance.startLocationUpdates();
+        }
         return mLocationUtility;
     }
 

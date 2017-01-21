@@ -30,6 +30,7 @@
         android:layout_height="wrap_content"
         android:text="@string/loginRegister"
         android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/search_view_inset"/>
+        android:layout_margin="@dimen/search_view_inset"
+        android:onClick="onClick"/>
 
 </RelativeLayout>
