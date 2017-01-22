@@ -32,13 +32,45 @@
         app:floatingSearch_leftActionMode="showHamburger"
         app:floatingSearch_menu="@menu/menu_type"
         app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
-    <Button
-        android:id="@+id/idBtnLogin"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/loginRegister"
         android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/search_view_inset"
-        android:onClick="onClick"/>
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <SeekBar
+                android:id="@+id/seekbar_map"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:progress="100"/>
+            <TextView
+                android:id="@+id/txt_seekbar_val"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:background="@drawable/shape_or"
+                android:textColor="@color/white"
+                android:text="34"
+                android:gravity="center"
+                android:textSize="@dimen/x_small_text_size"
+                android:layout_marginEnd="@dimen/small_margin"
+                android:layout_marginRight="@dimen/small_margin"/>
+        </LinearLayout>
+
+
+        <Button
+            android:id="@+id/idBtnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/loginRegister"
+            android:layout_margin="@dimen/search_view_inset"
+            android:onClick="onClick"/>
+    </LinearLayout>
+
 
 </RelativeLayout>
