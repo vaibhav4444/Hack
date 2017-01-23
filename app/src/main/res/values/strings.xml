@@ -6,6 +6,7 @@
     <string name="mobileNo">Mobile No.</string>
     <string name="type">Type</string>
     <string name="category">Category</string>
+    <string name="categories">Categories</string>
     <string name="email">Email (Optional)</string>
     <string name="address">Address (Optional)</string>
     <string name="password">Password</string>

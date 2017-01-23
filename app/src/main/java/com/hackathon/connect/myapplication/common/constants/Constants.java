@@ -21,10 +21,14 @@ public class Constants {
     public static final String ADDRESS = "&address=";
     public static final String URL_LOGIN = BASE_URL + "VendorRegistration/Login?";
     public static final String URL_LOGOUT = BASE_URL  + "VendorRegistration/Logout?vendorId=";
+    public static final String URL_SEARCH_VENDORS = BASE_URL + "VendorRegistration/Search?vendorType=";
+    public static final String URL_GET_UPDATED_LOCATIONS = BASE_URL + "VendorRegistration/GetUpdatedLocation?vendorsId=";
     public static final String CURRENT_LATITUDE = "&current_latitude=";
     public static final String CURRENT_LONGITUDE = "&current_longitude=";
     public static final String IS_STATIC_UPDATE = "&is_static_update=";
     public static final String IS_LAUNCHED_FROM_LOGIN = "isLaunchedFromLogin";
     public static final int KM_DISTANCE = 3500;
+
+    //http://ion.net.in/api/VendorRegistration/GetUpdatedLocation?vendorsId=1,2,3,4
 
 }

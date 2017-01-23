@@ -217,5 +217,6 @@ public class FuntionUtils {
         boolean needPermission = Build.VERSION.SDK_INT> Build.VERSION_CODES.LOLLIPOP_MR1;
         return needPermission;
     }
+
 }
 

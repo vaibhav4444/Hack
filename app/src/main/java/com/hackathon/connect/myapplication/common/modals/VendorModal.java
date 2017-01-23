@@ -5,6 +5,16 @@ package com.hackathon.connect.myapplication.common.modals;
  */
 
 public class VendorModal {
+    boolean is_active;
+
+    public boolean is_active() {
+        return is_active;
+    }
+
+    public void setIs_active(boolean is_active) {
+        this.is_active = is_active;
+    }
+
     private String fName, lName,  lat, lng;
     int vendorId, vendorType, rating;
     String mobile;

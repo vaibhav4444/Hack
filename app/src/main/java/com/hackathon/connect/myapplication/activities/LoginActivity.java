@@ -7,6 +7,7 @@ import android.location.Location;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.hackathon.connect.myapplication.R;
 import com.hackathon.connect.myapplication.common.constants.Constants;
@@ -164,7 +165,7 @@ public class LoginActivity extends BaseActivity{
                         }
                     }
                     else {
-
+                        Toast.makeText(LoginActivity.this, "Please check internet connection & try again", Toast.LENGTH_LONG).show();
                     }
                 }
             }, url);

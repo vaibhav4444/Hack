@@ -1,13 +1,26 @@
 package com.hackathon.connect.myapplication.activities;
 
+
+
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Point;
 import android.location.Location;
+import android.os.Handler;
+import android.os.SystemClock;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.SeekBar;
@@ -15,13 +28,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.hackathon.connect.myapplication.R;
@@ -68,6 +89,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location mMyCurrentLocationObject;
     private List<VendorModal> listVendorsToShow;
     private Map<String, VendorModal> mMapMarkerObjectModel;
+    private Map<String, Marker> mMapMarkerObjectModelToMove;
+    private PlaceAutocompleteFragment autocompleteFragment;
+    float zoomLevel = 14.0f; //This goes up to 21
+    private LinearLayout mLinLoginCategory;
+    private HorizontalScrollView mHorView;
+    private CheckBox chkVeg, chkAuto, chkElectrician, chkPlumber, chkCobbler, chkAll;
+    List<CheckBox> listChk;
+    private Place mPlaceObject;
+    String strIds= null;
+    private List<Marker> mListMarkersToShow;
+    private List<VendorModal> mListDynamicVendors;
+    private Fragment mSearchFrag;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +110,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mLocationUtility = new LocationUtility(this);
         mLocationUtility.setOnLocationUpdateListener(this);
         listVendorsToShow = new ArrayList<VendorModal>();
-        mFloatingSearchView = (FloatingSearchView) findViewById(R.id.floating_search_view) ;
+        mSearchFrag = getSupportFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+        mLinLoginCategory = (LinearLayout) findViewById(R.id.linLoginCategory);
+        mListDynamicVendors = new ArrayList<VendorModal>();
+        mHorView = (HorizontalScrollView) findViewById(R.id.idHorView);
+        chkVeg = (CheckBox) findViewById(R.id.idChkVeg);
+        chkAuto = (CheckBox) findViewById(R.id.idChkAuto);
+        chkElectrician = (CheckBox) findViewById(R.id.idChkElectrician);
+        chkPlumber = (CheckBox) findViewById(R.id.idChkPlumber);
+        chkCobbler = (CheckBox) findViewById(R.id.idChkCobbler);
+        chkAll =  (CheckBox) findViewById(R.id.idChkAll);
+        mListMarkersToShow= new ArrayList<Marker>();
+        listChk = new ArrayList<CheckBox>();
+        listChk.add(chkVeg);
+        listChk.add(chkAuto);
+        listChk.add(chkElectrician);
+        listChk.add(chkPlumber);
+        listChk.add(chkCobbler);
+        listChk.add(chkAll);
+        mMapMarkerObjectModelToMove = new HashMap<String, Marker>();
+       // mFloatingSearchView = (FloatingSearchView) findViewById(R.id.floating_search_view) ;
         mMongoUtil = new MongoLabUtil();
         mChkUpdateLocation = (CheckBox) findViewById(R.id.idChkUpdateLocation);
         seekbar_map = (SeekBar) findViewById(R.id.seekbar_map);
@@ -85,13 +138,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent intent = getIntent();
         if(intent != null && intent.getExtras() != null){
             isLaunchedFromLogin = intent.getBooleanExtra(Constants.IS_LAUNCHED_FROM_LOGIN, false);
+            //FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            //ft.hide(mSearchFrag);
+            //ft.commit();
         }
+        autocompleteFragment = (PlaceAutocompleteFragment)
+                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                // TODO: Get info about the selected place.
+                LogUtil.i("TAG", "Place: " + place.getName());
+                mMap.clear();
+                mPlaceObject = place;
+                zoomToPosition(place.getLatLng(), place);
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                LogUtil.i("TAG", "An error occurred: " + status);
+            }
+        });
         btnLoginLogout = (Button) findViewById(R.id.idBtnLogin);
         mMapMarkerObjectModel= new HashMap<String, VendorModal>();
         if(isLaunchedFromLogin){
             mChkUpdateLocation.setVisibility(View.VISIBLE);
             btnLoginLogout.setText(getString(R.string.logout));
-            mFloatingSearchView.setVisibility(View.GONE);
+           // mFloatingSearchView.setVisibility(View.GONE);
         }
         //mLocationUtility.startLocationUpdates();
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -100,8 +174,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
         FuntionUtils.showDialogToEnableGPS(this);
     }
+    public void onCategoryClick(View v){
+        //animateMarker(mMap, mMyPosMarker, null, false);
+        mLinLoginCategory.setVisibility(View.GONE);
+        mHorView.setVisibility(View.VISIBLE);
+    }
+    public void onCheckClick(View v){
+        strIds = null;
+        for (int i=0; i< listChk.size(); i++){
+            CheckBox  checkBox = listChk.get(i);
+            if(checkBox.isChecked()){
+                if( strIds == null){
+                    strIds = ""+1;
+                }
+                else{
+                    strIds = strIds + "," + (i+1);
+                }
+            }
+        }
+        if(strIds == null){
+            mLinLoginCategory.setVisibility(View.VISIBLE);
+            mHorView.setVisibility(View.GONE);
+        }
+        else{
+            getVendorsFromServer(mPlaceObject, strIds);
+        }
+        LogUtil.i("tag", "res:" +strIds);
+    }
     public void onClick(View v){
-        readFileFromAssets();
+        //readFileFromAssets();
         if(isLaunchedFromLogin){
             // logout
             String url = Constants.URL_LOGOUT + ApplicationClass.getAppInstance().getPrefs().getVendorId();
@@ -117,7 +218,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             if(isSuccess){
                                 isLaunchedFromLogin = false;
                                 Toast.makeText(MapsActivity.this, "Logout successful", Toast.LENGTH_LONG).show();
-                                mFloatingSearchView.setVisibility(View.VISIBLE);
+                                //mFloatingSearchView.setVisibility(View.VISIBLE);
                                 btnLoginLogout.setText(getString(R.string.loginRegister));
                                 mChkUpdateLocation.setVisibility(View.GONE);
                             }
@@ -137,7 +238,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         else {
             Intent intent = new Intent(this, LoginActivity.class);
-            //startActivity(intent);
+            startActivity(intent);
         }
     }
 
@@ -154,31 +255,231 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        if(mMap != null){
+            mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+
+                // Use default InfoWindow frame
+                @Override
+                public View getInfoWindow(Marker arg0) {
+                    return null;
+                }
+
+                // Defines the contents of the InfoWindow
+                @Override
+                public View getInfoContents(Marker arg0) {
+
+                    // Getting view from the layout file info_window_layout
+                    View v = getLayoutInflater().inflate(R.layout.pop_up_info_marker, null);
+
+                    // Getting the position from the marker
+                    LatLng latLng = arg0.getPosition();
+                    String t =  arg0.getTitle();
+                    VendorModal vendorModal = mMapMarkerObjectModel.get(t);
+
+                    // Getting reference to the TextView to set latitude
+                    TextView txtVendorName = (TextView) v.findViewById(R.id.txtVendorName);
+
+                    // Getting reference to the TextView to set longitude
+                    TextView txtVendorContactNumber = (TextView) v.findViewById(R.id.txtVendorNumber);
+
+                    // Setting the latitude
+                    txtVendorName.setText(vendorModal.getfName()+ " "+ vendorModal.getlName());
+
+                    // Setting the longitude
+                    txtVendorContactNumber.setText(vendorModal.getMobile());
+                    RatingBar ratingBar = (RatingBar) v.findViewById(R.id.idRatingBar);
+                    ratingBar.setRating(vendorModal.getRating());
+
+                    // Returning the view containing InfoWindow contents
+                    return v;
+
+                }
+            });
+        }
 
         // Add a marker in Sydney and move the camera
         //LatLng sydney = new LatLng(-34, 151);
         //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
+    private void animateToShowAllMarker(List<Marker> markerList){
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (Marker marker : markerList) {
+            builder.include(marker.getPosition());
+        }
+        LatLngBounds bounds = builder.build();
+        int padding = 80; // offset from edges of the map in pixels
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+        mMap.animateCamera(cu);
+        getUpdatedLocation();
+        //float zoomL = mMap.getCameraPosition().zoom;
+        // zoom=CameraUpdateFactory.zoomTo(zoomL - 1);
+        //mMap.animateCamera(zoom);
+    }
+    private void getUpdatedLocation(){
+        String strIDs = null;
+        for(VendorModal vendorModal : mListDynamicVendors){
+            if(strIDs == null){
+                strIDs = ""+vendorModal.getVendorId();
+            }
+            else{
+                strIDs = strIDs + "," + vendorModal.getVendorId();
+            }
+        }
+
+        if(strIDs != null) {
+            final ProgressDialog progressDialog = FuntionUtils.showProgressSialog(this);
+            mMongoUtil.getData(new AsyncResponse() {
+                @Override
+                public void processFinish(String output) {
+                    progressDialog.hide();
+                    JSONObject object = null;
+                    try {
+                        object = new JSONObject(output);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    List<VendorModal> listVendorToMove = new ArrayList<VendorModal>();
+                    if (object != null) {
+                        boolean isSuccess = false;
+                        try {
+                            isSuccess = object.getBoolean(Constants.STR_IS_SUCCESS);
+                            if (isSuccess) {
+                                JSONArray array = null;
+
+                                array = object.getJSONArray("Data");
+
+
+                                for (int i = 0; i < array.length(); i++) {
+                                    JSONObject jsonObject = null;
+
+                                    jsonObject = array.getJSONObject(i);
+
+                                    //is_static_update = false means dynamic  email, category_id, is_active,
+                                    //{id=vendor_id,first_name=?,last_name=?, lat=?,long=?,mobile=?,type=?,is_staic=?,rating=?},
+                                    String fName = jsonObject.getString("first_name");
+                                    String lName = jsonObject.getString("last_name");
+                                    int vendorId = jsonObject.getInt("id");
+                                    String lat = jsonObject.getString("lattitude");
+                                    String lng = jsonObject.getString("longitude");
+                                    String mobile = jsonObject.getString("mobile_no");
+                                    int type = jsonObject.getInt("category_id");
+                                    boolean isActive = jsonObject.getBoolean("is_active");
+                                    boolean isStatic = jsonObject.getBoolean("is_static_update");
+                                    int rating = jsonObject.getInt("rating");
+                                    VendorModal vendorModal = new VendorModal();
+                                    vendorModal.setVendorId(vendorId);
+                                    vendorModal.setfName(fName);
+                                    vendorModal.setlName(lName);
+                                    vendorModal.setLat(lat);
+                                    vendorModal.setLng(lng);
+                                    vendorModal.setVendorType(type);
+                                    vendorModal.setRating(rating);
+                                    vendorModal.setStatic(isStatic);
+                                    vendorModal.setMobile(mobile);
+                                    vendorModal.setIs_active(isActive);
+                                    listVendorToMove.add(vendorModal);
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        animateMarkersFromList(listVendorToMove);
+
+                    }
+                }
+
+            }, Constants.URL_GET_UPDATED_LOCATIONS + strIDs);
+        }
+
+    }
+    private void animateMarkersFromList(List<VendorModal> listVendorsToMove){
+        for(VendorModal vendorModal : listVendorsToMove){
+            animateMarker(mMap, mMapMarkerObjectModelToMove.get(vendorModal.getfName()), new LatLng(Double.parseDouble(vendorModal.getLat()), Double.parseDouble(vendorModal.getLng())), false);
+        }
+
+    }
+    private void zoomToPosition(LatLng latLng, Place place){
+        mMyPosMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(place.getAddress().toString()).icon(BitmapDescriptorFactory.fromResource(R.drawable.greenpin)));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
+        getVendorsFromServer(place, strIds);
+    }
+    private void getVendorsFromServer(final Place place, String categoryids){
+        if(TextUtils.isEmpty(categoryids)){
+            Toast.makeText(this, "Please select category.", Toast.LENGTH_LONG).show();
+        }
+        String url = Constants.URL_SEARCH_VENDORS + categoryids;
+        final ProgressDialog progressDialog = FuntionUtils.showProgressSialog(this);
+        mMongoUtil.getData(new AsyncResponse() {
+            @Override
+            public void processFinish(String output) {
+                progressDialog.hide();
+                parseVendorsResponse(output, place);
+
+            }
+        }, url);
+    }
 
     @Override
     public void notifyLocationChange(Location location) {
         if(mMap != null){
             //i.e user
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
             if(!isLaunchedFromLogin && (mMyPosMarker == null)) {
-                float zoomLevel = 13.0f; //This goes up to 21
+
                 mMyCurrentLocationObject = location;
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
                 mMyPosMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("My current position").icon(BitmapDescriptorFactory.fromResource(R.drawable.greenpin)));
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
-                mCircle = drawCircle(latLng,100);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
+               // mCircle = drawCircle(latLng,100);
                 if(mCircle!=null) {
-                    MapUtils.getCircleIntoView(mMap, MapUtils.boundsWithCenterAndLatLngDistance(mCircle.getCenter(), (float) mCircle.getRadius(), (float) mCircle.getRadius()));
+                    //MapUtils.getCircleIntoView(mMap, MapUtils.boundsWithCenterAndLatLngDistance(mCircle.getCenter(), (float) mCircle.getRadius(), (float) mCircle.getRadius()));
                 }
+            }
+            if(isLaunchedFromLogin && mMyCurrentLocationObject ==  null){
+                mMyCurrentLocationObject = location;
+                mMyPosMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("My current position").icon(BitmapDescriptorFactory.fromResource(R.drawable.greenpin)));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
+                findViewById(R.id.idBtnSelectCategory).setVisibility(View.GONE);
             }
 
 
         }
+    }
+    public static void animateMarker(final GoogleMap map, final Marker marker, final LatLng toPosition,
+                                     final boolean hideMarker) {
+
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        Projection proj = map.getProjection();
+        Point startPoint = proj.toScreenLocation(marker.getPosition());
+        final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+        final long duration = 2500;
+
+        final Interpolator interpolator = new LinearInterpolator();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed / duration);
+                double lng = t * toPosition.longitude + (1 - t) * startLatLng.longitude;
+                double lat = t * toPosition.latitude + (1 - t) * startLatLng.latitude;
+
+                marker.setPosition(new LatLng(lat, lng));
+
+                if (t < 1.0) {
+                    // Post again 16ms later.
+                    handler.postDelayed(this, 16);
+                } else {
+                    if (hideMarker) {
+                        marker.setVisible(false);
+                    } else {
+                        marker.setVisible(true);
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -205,11 +506,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            mCircle = drawCircle(seekBar.getProgress());
+            //mCircle = drawCircle(seekBar.getProgress());
             if(mCircle!=null) {
-                MapUtils.getCircleIntoView(mMap, MapUtils.boundsWithCenterAndLatLngDistance(mCircle.getCenter(), (float) mCircle.getRadius(), (float) mCircle.getRadius()));
+                //MapUtils.getCircleIntoView(mMap, MapUtils.boundsWithCenterAndLatLngDistance(mCircle.getCenter(), (float) mCircle.getRadius(), (float) mCircle.getRadius()));
             }
-            txt_seekbar_val.setText(String.format(Locale.getDefault(),"%d",seekBar.getProgress()));
+            //txt_seekbar_val.setText(String.format(Locale.getDefault(),"%d",seekBar.getProgress()));
         }
     };
 
@@ -227,34 +528,85 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return MapUtils.drawCircle(this, mMap, latLng, radiusInMeters);
 
     }
-    private List<VendorModal> parseVendorsResponse(String response){
+    private List<VendorModal> parseVendorsResponse(String response, Place place){
         List<VendorModal> listVendorModel  = new ArrayList<VendorModal>();
         try {
-            JSONArray array = new JSONArray(response);
+            JSONObject object = new JSONObject(response);
+            if(object != null){
+                boolean isSuccess = object.getBoolean(Constants.STR_IS_SUCCESS);
+                if(isSuccess) {
+                    JSONArray array = object.getJSONArray("Data");
 
-            for (int i=0; i < array.length(); i++){
-                JSONObject jsonObject = array.getJSONObject(i);
-                //{id=vendor_id,first_name=?,last_name=?, lat=?,long=?,mobile=?,type=?,is_staic=?,rating=?},
-                String fName = jsonObject.getString("first_name");
-                String lName = jsonObject.getString("last_name");
-                int vendorId = jsonObject.getInt("id");
-                String lat  = jsonObject.getString("lat");
-                String lng = jsonObject.getString("long");
-                String mobile = jsonObject.getString("mobile");
-                int type = jsonObject.getInt("type");
-                boolean isStatic = jsonObject.getBoolean("is_staic");
-                int rating = jsonObject.getInt("rating");
-                VendorModal vendorModal = new VendorModal();
-                vendorModal.setVendorId(vendorId);
-                vendorModal.setfName(fName);
-                vendorModal.setlName(lName);
-                vendorModal.setLat(lat);
-                vendorModal.setLng(lng);
-                vendorModal.setVendorType(type);
-                vendorModal.setRating(rating);
-                vendorModal.setStatic(isStatic);
-                vendorModal.setMobile(mobile);
-                listVendorModel.add(vendorModal);
+                    for (int i = 0; i < array.length(); i++) {
+                        JSONObject jsonObject = array.getJSONObject(i);
+                        //is_static_update = false means dynamic  email, category_id, is_active,
+                        //{id=vendor_id,first_name=?,last_name=?, lat=?,long=?,mobile=?,type=?,is_staic=?,rating=?},
+                        String fName = jsonObject.getString("first_name");
+                        String lName = jsonObject.getString("last_name");
+                        int vendorId = jsonObject.getInt("id");
+                        String lat = jsonObject.getString("lattitude");
+                        String lng = jsonObject.getString("longitude");
+                        String mobile = jsonObject.getString("mobile_no");
+                        int type = jsonObject.getInt("category_id");
+                        boolean isActive = jsonObject.getBoolean("is_active");
+                        boolean isStatic = jsonObject.getBoolean("is_static_update");
+                        int rating = jsonObject.getInt("rating");
+                        VendorModal vendorModal = new VendorModal();
+                        vendorModal.setVendorId(vendorId);
+                        vendorModal.setfName(fName);
+                        vendorModal.setlName(lName);
+                        vendorModal.setLat(lat);
+                        vendorModal.setLng(lng);
+                        vendorModal.setVendorType(type);
+                        vendorModal.setRating(rating);
+                        vendorModal.setStatic(isStatic);
+                        vendorModal.setMobile(mobile);
+                        vendorModal.setIs_active(isActive);
+                        listVendorModel.add(vendorModal);
+                    }
+                    mMapMarkerObjectModel.clear();
+                    double latitude = 0;
+                    double longitude = 0;
+                    if(mMyCurrentLocationObject != null){
+                        latitude = mMyCurrentLocationObject.getLatitude();
+                        longitude = mMyCurrentLocationObject.getLongitude();
+
+                    }
+                    else if(place != null){
+                        latitude = place.getLatLng().latitude;
+                        longitude = place.getLatLng().longitude;
+                    }
+
+                    for(VendorModal vendorModal : listVendorModel){
+                       // mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(vendorModal.getLat()), Double.parseDouble(vendorModal.getLng()))).title(vendorModal.getfName()));
+                        float [] result = new float[1];
+                        android.location.Location.distanceBetween(latitude, longitude, Double.parseDouble(vendorModal.getLat()), Double.parseDouble(vendorModal.getLng()), result);
+                        if(result[0] <= Constants.KM_DISTANCE){
+                            listVendorsToShow.add(vendorModal);
+                        }
+                        LogUtil.i("tag", ""+"fggjk");
+                    }
+
+                    for(int i=1;  i< mListMarkersToShow.size(); i++){
+                        Marker marker = mListMarkersToShow.get(i);
+                        marker.remove();
+                    }
+                    mListMarkersToShow.clear();
+                    mListMarkersToShow.add(mMyPosMarker);
+                    for(VendorModal vendorModal : listVendorsToShow) {
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(vendorModal.getLat()), Double.parseDouble(vendorModal.getLng()))).title(vendorModal.getfName()));
+                        marker.setTag(vendorModal);
+                        mListMarkersToShow.add(marker);
+                        mMapMarkerObjectModel.put(marker.getTitle(), vendorModal);
+                        if(!vendorModal.isStatic()){
+                            mListDynamicVendors.add(vendorModal);
+                            mMapMarkerObjectModelToMove.put(marker.getTitle(), marker);
+                        }
+                        animateToShowAllMarker(mListMarkersToShow);
+
+                    }
+                    LogUtil.i("tag", ""+"fggjk");
+                }
 
             }
         } catch (JSONException e) {
@@ -263,7 +615,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return listVendorModel;
 
     }
-    private String readFileFromAssets(){
+   /* private String readFileFromAssets(){
         StringBuilder buf=new StringBuilder();
         InputStream json= null;
         try {
@@ -310,48 +662,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMapMarkerObjectModel.put(marker.getTitle(), vendorModal);
             }
         }
-        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
 
-            // Use default InfoWindow frame
-            @Override
-            public View getInfoWindow(Marker arg0) {
-                return null;
-            }
-
-            // Defines the contents of the InfoWindow
-            @Override
-            public View getInfoContents(Marker arg0) {
-
-                // Getting view from the layout file info_window_layout
-                View v = getLayoutInflater().inflate(R.layout.pop_up_info_marker, null);
-
-                // Getting the position from the marker
-                LatLng latLng = arg0.getPosition();
-                String t =  arg0.getTitle();
-                VendorModal vendorModal = mMapMarkerObjectModel.get(t);
-
-                // Getting reference to the TextView to set latitude
-                TextView txtVendorName = (TextView) v.findViewById(R.id.txtVendorName);
-
-                // Getting reference to the TextView to set longitude
-                TextView txtVendorContactNumber = (TextView) v.findViewById(R.id.txtVendorNumber);
-
-                // Setting the latitude
-                txtVendorName.setText(vendorModal.getfName()+ " "+ vendorModal.getlName());
-
-                // Setting the longitude
-                txtVendorName.setText(vendorModal.getMobile());
-                RatingBar ratingBar = (RatingBar) v.findViewById(R.id.idRatingBar);
-                ratingBar.setRating(vendorModal.getRating());
-
-                // Returning the view containing InfoWindow contents
-                return v;
-
-            }
-        });
 
 
         return  buf.toString();
-    }
+    } */
 
 }

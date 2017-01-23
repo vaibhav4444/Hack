@@ -160,6 +160,8 @@ public class SignUpScreen extends BaseActivity implements AdapterView.OnItemSele
                     boolean isSuccess = object.getBoolean(Constants.STR_IS_SUCCESS);
                     if(isSuccess){
                         FuntionUtils.showRegisterSuccess(SignUpScreen.this);
+                        prefs.setUsername("");
+                        prefs.setPassword("");
                     }
                     else {
                         String message = object.getString("Message");

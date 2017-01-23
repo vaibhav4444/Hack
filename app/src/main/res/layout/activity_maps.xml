@@ -1,8 +1,19 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:tools="http://schemas.android.com/tools">
+    <fragment
+        android:id="@+id/place_autocomplete_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+        />
+<RelativeLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="0dp"
+    android:layout_weight="1">
 
 <fragment
     xmlns:map="http://schemas.android.com/apk/res-auto"
@@ -14,11 +25,12 @@
     <CheckBox
         android:id="@+id/idChkUpdateLocation"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:text="@string/updateLocation"
+        android:paddingTop="5dp"
         android:layout_alignParentTop="true"
         android:visibility="gone"/>
-    <com.arlib.floatingsearchview.FloatingSearchView
+    <!--<com.arlib.floatingsearchview.FloatingSearchView
         android:layout_alignParentTop="true"
         android:id="@+id/floating_search_view"
         android:layout_width="match_parent"
@@ -31,7 +43,8 @@
         app:floatingSearch_showSearchKey="false"
         app:floatingSearch_leftActionMode="showHamburger"
         app:floatingSearch_menu="@menu/menu_type"
-        app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
+        app:floatingSearch_close_search_on_keyboard_dismiss="true"/> -->
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -42,7 +55,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
             <SeekBar
                 android:id="@+id/seekbar_map"
                 android:layout_width="0dp"
@@ -62,15 +76,91 @@
                 android:layout_marginRight="@dimen/small_margin"/>
         </LinearLayout>
 
-
-        <Button
-            android:id="@+id/idBtnLogin"
+        <LinearLayout
+            android:id="@+id/linLoginCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="@dimen/search_view_inset">
+        <Button
+            android:id="@+id/idBtnLogin"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:text="@string/loginRegister"
-            android:layout_margin="@dimen/search_view_inset"
+            android:singleLine="true"
+
             android:onClick="onClick"/>
+            <Button
+                android:id="@+id/idBtnSelectCategory"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/categories"
+                android:onClick="onCategoryClick"/>
+        </LinearLayout>
+
+
     </LinearLayout>
+
+   <!-- <ToggleButton
+        android:layout_alignParentRight="true"
+        android:text="Notify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/toggleButton" /> -->
 
 
 </RelativeLayout>
+    <HorizontalScrollView
+        android:id="@+id/idHorView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:scrollbars="none"
+        android:visibility="gone"
+        android:background="#FF9999"
+        android:layout_marginBottom="5dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="5dp">
+            <CheckBox
+                android:id="@+id/idChkVeg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vegetable seller"
+                android:onClick="onCheckClick"/>
+            <CheckBox
+                android:id="@+id/idChkAuto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Auto"
+                android:onClick="onCheckClick"/>
+            <CheckBox
+                android:id="@+id/idChkElectrician"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Electrician"
+                android:onClick="onCheckClick"/>
+            <CheckBox
+                android:id="@+id/idChkPlumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Plumber"
+                android:onClick="onCheckClick"/>
+            <CheckBox
+                android:id="@+id/idChkCobbler"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cobbler"
+                android:onClick="onCheckClick"/>
+            <CheckBox
+                android:id="@+id/idChkAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All"
+                android:onClick="onCheckClick"/>
+        </LinearLayout>
+    </HorizontalScrollView>
+    </LinearLayout>
