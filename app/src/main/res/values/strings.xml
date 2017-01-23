@@ -5,6 +5,7 @@
     <string name="lName">Last name</string>
     <string name="mobileNo">Mobile No.</string>
     <string name="type">Type</string>
+    <string name="category">Category</string>
     <string name="email">Email (Optional)</string>
     <string name="password">Password</string>
     <string name="createAccount">CREATE ACCOUNT</string>
