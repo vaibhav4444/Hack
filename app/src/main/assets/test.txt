@@ -1,0 +1,21 @@
+[{
+	id: '1234',
+	first_name: 'test1',
+	last_name: 'user1',
+	lat: '17.441668',
+	long: '78.384532',
+	mobile: '1111111111',
+	type: 1,
+	is_staic: true,
+	rating: 1
+}, {
+	id: 1234,
+	first_name: 'test2',
+	last_name: 'user2',
+	lat: '17.239741',
+	long: '78.428892',
+	mobile: '2222222222',
+	type: 2,
+	is_staic: true,
+	rating: 2
+}]

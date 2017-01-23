@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/score_pin_new"
+    android:gravity="center_horizontal"
+    android:padding="2dp">
+    <TextView
+        android:id="@+id/txtVendorName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="hefgh"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No. :"
+            android:textSize="12sp"/>
+        <TextView
+            android:id="@+id/txtVendorNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="9560395144"
+            android:textSize="12sp"
+            />
+
+    </LinearLayout>
+
+    <RatingBar
+        style="?android:attr/ratingBarStyleSmall"
+        android:id="@+id/idRatingBar"
+        android:max="5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+</LinearLayout>

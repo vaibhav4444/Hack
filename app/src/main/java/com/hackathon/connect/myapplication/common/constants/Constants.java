@@ -25,5 +25,6 @@ public class Constants {
     public static final String CURRENT_LONGITUDE = "&current_longitude=";
     public static final String IS_STATIC_UPDATE = "&is_static_update=";
     public static final String IS_LAUNCHED_FROM_LOGIN = "isLaunchedFromLogin";
+    public static final int KM_DISTANCE = 3500;
 
 }
