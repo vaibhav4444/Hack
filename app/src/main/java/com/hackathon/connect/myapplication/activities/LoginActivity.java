@@ -56,6 +56,7 @@ public class LoginActivity extends BaseActivity{
         if(id == R.id.email_register_button){
             Intent intent = new Intent(LoginActivity.this, SignUpScreen.class);
             startActivity(intent);
+            finish();
         }
         else if(id == R.id.email_sign_in_button) {
             attemptLogin();

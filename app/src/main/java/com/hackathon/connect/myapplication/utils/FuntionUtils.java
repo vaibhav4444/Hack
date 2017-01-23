@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.res.Resources;
+import android.os.Build;
 
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -20,6 +21,7 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.hackathon.connect.myapplication.R;
 import com.hackathon.connect.myapplication.activities.BaseActivity;
 import com.hackathon.connect.myapplication.activities.LoginActivity;
+import com.hackathon.connect.myapplication.activities.PermissionsActivity;
 import com.hackathon.connect.myapplication.common.constants.Constants;
 import com.hackathon.connect.myapplication.helper.PermissionsHelper;
 
@@ -183,5 +185,37 @@ public class FuntionUtils {
         alertDialog.show();
     }
 
+    public static void showDialogForReadPermissionDeniedFromPermission(final Activity activity) {
+        Resources resources = activity.getResources();
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
+        dialogBuilder.setTitle(resources.getString(R.string.permissionDenied));
+        dialogBuilder.setMessage(resources.getString(R.string.readPermissionDenied));
+
+        dialogBuilder.setPositiveButton(resources.getString(R.string.amSure), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+                if(activity instanceof  PermissionsActivity){
+                    ((PermissionsActivity)activity).launchMapsActivity();
+                }
+            }
+        });
+        dialogBuilder.setNegativeButton(resources.getString(R.string.retry), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                if(activity instanceof PermissionsActivity){
+                    ((PermissionsActivity)activity).requestPermissions();
+                }
+            }
+        });
+
+
+        AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
+    public static boolean isNeedPermission(){
+        boolean needPermission = Build.VERSION.SDK_INT> Build.VERSION_CODES.LOLLIPOP_MR1;
+        return needPermission;
+    }
 }
 

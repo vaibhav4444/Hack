@@ -2,6 +2,7 @@ package com.hackathon.connect.myapplication.activities;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.support.design.widget.TextInputLayout;
@@ -37,7 +38,7 @@ import java.util.List;
  */
 
 public class SignUpScreen extends BaseActivity implements AdapterView.OnItemSelectedListener{
-    private EditText edtFName, edtLName, edtEmail, edtMobile, edtType, edtPassword;
+    private EditText edtFName, edtLName, edtEmail, edtMobile, edtType, edtPassword, edt_address;
     private boolean isStatic = false;
     private ArrayList<EditText> arrayListEditText;
     private CheckBox chkIsStatic;
@@ -48,6 +49,7 @@ public class SignUpScreen extends BaseActivity implements AdapterView.OnItemSele
     private Spinner mSpinner;
     private int mSelectedCategory = 0;
     private boolean isOncreate = true;
+    private TextView mTxtAlready;
 
     @Override
     protected int getLayoutId() {
@@ -62,9 +64,19 @@ public class SignUpScreen extends BaseActivity implements AdapterView.OnItemSele
         edtLName = (EditText) mView.findViewById(R.id.edt_lastName);
         edtEmail = (EditText) mView.findViewById(R.id.edt_email);
         edtMobile = (EditText) mView.findViewById(R.id.edt_mobile);
+        edt_address = (EditText) mView.findViewById(R.id.edt_address);
         //edtType = (EditText) mView.findViewById(R.id.edt_type);
         edtPassword = (EditText) mView.findViewById(R.id.edt_password);
         mSpinner = (Spinner) mView.findViewById(R.id.idSpinnerCategory);
+        mTxtAlready = (TextView) mView.findViewById(R.id.txtAlreadyUser);
+        mTxtAlready.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SignUpScreen.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
         /*txtInputLayout = (TextInputLayout) mView.findViewById(R.id.txtIntype);
         registerForContextMenu(txtInputLayout);
         txtInputLayout.setOnClickListener(new View.OnClickListener() {
@@ -132,8 +144,12 @@ public class SignUpScreen extends BaseActivity implements AdapterView.OnItemSele
             mLatitude =  "" + location.getLatitude();
             mLongitude = "" + location.getLongitude();
         }
+        String address ="";
+        if(!TextUtils.isEmpty(edt_address.getText().toString())){
+            address = edt_address.getText().toString();
+        }
         url = Constants.REGISTRATION_URL+Constants.F_NAME+getStringFromEditText(edtFName) + Constants.L_NAME + getStringFromEditText(edtLName) + Constants.MOBILE + getStringFromEditText(edtMobile) + Constants.EMAIL + getStringFromEditText(edtEmail) +
-                 Constants.CATEGORY_ID + getStringFromEditText(edtType) + Constants.LATITUDE + mLatitude + Constants.LONGITUDE + mLongitude  + Constants.PASSWORD + getStringFromEditText(edtPassword) + Constants.ADDRESS + "abc";
+                 Constants.CATEGORY_ID + mSelectedCategory + Constants.LATITUDE + mLatitude + Constants.LONGITUDE + mLongitude  + Constants.PASSWORD + getStringFromEditText(edtPassword) + Constants.ADDRESS + address;
         final ProgressDialog dialog = FuntionUtils.showProgressSialog(this);
         mongoLabUtil.getData(new AsyncResponse() {
             @Override

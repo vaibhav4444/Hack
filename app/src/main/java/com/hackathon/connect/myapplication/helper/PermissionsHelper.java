@@ -34,7 +34,7 @@ public class PermissionsHelper {
     public boolean isPermissionRequiredForAppGranted(){
         boolean isGranted = false;
         //use && add more permissions if required
-        if(isReadStoragePermissionGranted()){
+        if(isGPSPermissionGranted()){
             isGranted = true;
         }
         return isGranted;
