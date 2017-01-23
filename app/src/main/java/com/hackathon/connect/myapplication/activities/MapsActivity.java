@@ -3,6 +3,8 @@ package com.hackathon.connect.myapplication.activities;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -28,6 +30,7 @@ import com.hackathon.connect.myapplication.R;
 import com.hackathon.connect.myapplication.common.app.ApplicationClass;
 import com.hackathon.connect.myapplication.common.constants.Constants;
 import com.hackathon.connect.myapplication.common.modals.VendorModal;
+import com.hackathon.connect.myapplication.helper.ListBottomSheetDialog;
 import com.hackathon.connect.myapplication.listener.AsyncResponse;
 import com.hackathon.connect.myapplication.listener.ILocationUpdates;
 import com.hackathon.connect.myapplication.utils.FuntionUtils;
@@ -81,7 +84,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mChkUpdateLocation = (CheckBox) findViewById(R.id.idChkUpdateLocation);
         seekbar_map = (SeekBar) findViewById(R.id.seekbar_map);
         seekbar_map.setOnSeekBarChangeListener(seekBarChangeListener);
+        seekbar_map.setMax(10);
+        seekbar_map.setProgress(10);
         txt_seekbar_val = (TextView) findViewById(R.id.txt_seekbar_val);
+        txt_seekbar_val.setText(String.format(Locale.getDefault(),"%d",seekbar_map.getProgress()));
         Intent intent = getIntent();
         if(intent != null && intent.getExtras() != null){
             isLaunchedFromLogin = intent.getBooleanExtra(Constants.IS_LAUNCHED_FROM_LOGIN, false);
@@ -171,11 +177,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 mMyPosMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("My current position").icon(BitmapDescriptorFactory.fromResource(R.drawable.greenpin)));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
-                mCircle = drawCircle(latLng,100);
-                if(mCircle!=null) {
+                mCircle = drawCircle(latLng,10);
+               /* if(mCircle!=null) {
                     MapUtils.getCircleIntoView(mMap, MapUtils.boundsWithCenterAndLatLngDistance(mCircle.getCenter(), (float) mCircle.getRadius(), (float) mCircle.getRadius()));
-                }
+                }*/
             }
+
 
 
         }
@@ -206,9 +213,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
             mCircle = drawCircle(seekBar.getProgress());
-            if(mCircle!=null) {
+           /* if(mCircle!=null) {
                 MapUtils.getCircleIntoView(mMap, MapUtils.boundsWithCenterAndLatLngDistance(mCircle.getCenter(), (float) mCircle.getRadius(), (float) mCircle.getRadius()));
-            }
+            }*/
             txt_seekbar_val.setText(String.format(Locale.getDefault(),"%d",seekBar.getProgress()));
         }
     };
@@ -310,17 +317,66 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMapMarkerObjectModel.put(marker.getTitle(), vendorModal);
             }
         }
-        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(final Marker marker) {
+
+                ListBottomSheetDialog listBottomSheetDialog = ListBottomSheetDialog.newInstance(new BottomSheetBehavior.BottomSheetCallback() {
+                    @Override
+                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
+
+                    }
+
+                    @Override
+                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+                    }
+                }, new ListBottomSheetDialog.IListBottomSheet() {
+                    @Override
+                    public String getTitle() {
+                        return null;
+                    }
+
+                    @Override
+                    public View getContentView() {
+                        View view = getLayoutInflater().inflate(R.layout.layout_marker_info,null);
+
+                        // Getting the position from the marker
+                        LatLng latLng = marker.getPosition();
+                        String t =  marker.getTitle();
+                        VendorModal vendorModal = mMapMarkerObjectModel.get(t);
+
+                        // Getting reference to the TextView to set latitude
+                        TextView txtVendorName = (TextView) view.findViewById(R.id.txtVendorName);
+
+                        // Getting reference to the TextView to set longitude
+                        TextView txtVendorContactNumber = (TextView) view.findViewById(R.id.txtVendorNumber);
+
+                        // Setting the latitude
+                        //> txtVendorName.setText(vendorModal.getfName()+ " "+ vendorModal.getlName());
+
+                        // Setting the longitude
+                        //> txtVendorName.setText(vendorModal.getMobile());
+                        RatingBar ratingBar = (RatingBar) view.findViewById(R.id.idRatingBar);
+                        //> ratingBar.setRating(vendorModal.getRating());
+
+                        // Returning the view containing InfoWindow contents
+
+
+                        return view;
+                    }
+                });
+                listBottomSheetDialog.show(getSupportFragmentManager(),listBottomSheetDialog.getTag());
+                return true;
+            }
+        });
+
+
+       /* mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
 
             // Use default InfoWindow frame
             @Override
             public View getInfoWindow(Marker arg0) {
-                return null;
-            }
-
-            // Defines the contents of the InfoWindow
-            @Override
-            public View getInfoContents(Marker arg0) {
 
                 // Getting view from the layout file info_window_layout
                 View v = getLayoutInflater().inflate(R.layout.pop_up_info_marker, null);
@@ -337,19 +393,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 TextView txtVendorContactNumber = (TextView) v.findViewById(R.id.txtVendorNumber);
 
                 // Setting the latitude
-                txtVendorName.setText(vendorModal.getfName()+ " "+ vendorModal.getlName());
+               //> txtVendorName.setText(vendorModal.getfName()+ " "+ vendorModal.getlName());
 
                 // Setting the longitude
-                txtVendorName.setText(vendorModal.getMobile());
+               //> txtVendorName.setText(vendorModal.getMobile());
                 RatingBar ratingBar = (RatingBar) v.findViewById(R.id.idRatingBar);
-                ratingBar.setRating(vendorModal.getRating());
+               //> ratingBar.setRating(vendorModal.getRating());
 
                 // Returning the view containing InfoWindow contents
                 return v;
+            }
+
+            // Defines the contents of the InfoWindow
+            @Override
+            public View getInfoContents(Marker arg0) {
+                return null;
 
             }
-        });
-
+        });*/
 
         return  buf.toString();
     }
