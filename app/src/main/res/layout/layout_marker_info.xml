@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@drawable/score_pin_new"
-    android:gravity="center_horizontal"
-    android:padding="2dp">
+    android:background="@color/white"
+    android:padding="@dimen/medium_padding"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <TextView
         android:id="@+id/txtVendorName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="hefgh"
+        android:textStyle="bold"
+        android:textSize="@dimen/regular_txt_size"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"/>
     <LinearLayout
@@ -29,10 +30,18 @@
             android:layout_height="wrap_content"
             android:text="9560395144"
             android:textSize="12sp" />
-    </LinearLayout>
+        </LinearLayout>
     <RatingBar
-        android:id="@+id/idRatingBar"
-        style="@style/ratingBar"
+        android:id="@+id/rating_bar_salon_item"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:rating="0"
+        android:isIndicator="true"
+        style="@style/ratingBar"/>
+
+    <TextView
+        android:id="@+id/txtView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
 </LinearLayout>
