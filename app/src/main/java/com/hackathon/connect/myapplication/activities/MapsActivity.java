@@ -12,6 +12,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
@@ -39,8 +41,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -101,6 +105,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private List<Marker> mListMarkersToShow;
     private List<VendorModal> mListDynamicVendors;
     private Fragment mSearchFrag;
+    private List<VendorModal> mNotifyArray;
 
 
     @Override
@@ -113,6 +118,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mSearchFrag = getSupportFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
         mLinLoginCategory = (LinearLayout) findViewById(R.id.linLoginCategory);
         mListDynamicVendors = new ArrayList<VendorModal>();
+        mNotifyArray  = new ArrayList<VendorModal>();
         mHorView = (HorizontalScrollView) findViewById(R.id.idHorView);
         chkVeg = (CheckBox) findViewById(R.id.idChkVeg);
         chkAuto = (CheckBox) findViewById(R.id.idChkAuto);
@@ -185,7 +191,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             CheckBox  checkBox = listChk.get(i);
             if(checkBox.isChecked()){
                 if( strIds == null){
-                    strIds = ""+1;
+                    strIds = ""+ (i+1);
                 }
                 else{
                     strIds = strIds + "," + (i+1);
@@ -261,7 +267,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // Use default InfoWindow frame
                 @Override
                 public View getInfoWindow(Marker arg0) {
+                    View v = getLayoutInflater().inflate(R.layout.pop_up_info_marker, null);
+
+                    // Getting the position from the marker
+                    LatLng latLng = arg0.getPosition();
+                    String t =  arg0.getTitle();
+                    final VendorModal vendorModal = mMapMarkerObjectModel.get(t);
+                    if(vendorModal != null) {
+
+                        // Getting reference to the TextView to set latitude
+                        TextView txtVendorName = (TextView) v.findViewById(R.id.txtVendorName);
+
+                        // Getting reference to the TextView to set longitude
+                        TextView txtVendorContactNumber = (TextView) v.findViewById(R.id.txtVendorNumber);
+
+                        // Setting the latitude
+                        txtVendorName.setText(vendorModal.getfName() + " " + vendorModal.getlName());
+
+                        // Setting the longitude
+                        txtVendorContactNumber.setText(vendorModal.getMobile());
+                        RatingBar ratingBar = (RatingBar) v.findViewById(R.id.idRatingBar);
+                        ratingBar.setRating(vendorModal.getRating());
+                        /*CheckBox chkNotify = (CheckBox) v.findViewById(R.id.chkNotify);
+                        chkNotify.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                if(isChecked){
+                                    mNotifyArray.add(vendorModal);
+                                }
+                            }
+                        }); */
+                        return v;
+                    }
                     return null;
+
+                    // Returning the view containing InfoWindow contents
+
                 }
 
                 // Defines the contents of the InfoWindow
@@ -269,38 +310,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 public View getInfoContents(Marker arg0) {
 
                     // Getting view from the layout file info_window_layout
-                    View v = getLayoutInflater().inflate(R.layout.pop_up_info_marker, null);
-
-                    // Getting the position from the marker
-                    LatLng latLng = arg0.getPosition();
-                    String t =  arg0.getTitle();
-                    VendorModal vendorModal = mMapMarkerObjectModel.get(t);
-
-                    // Getting reference to the TextView to set latitude
-                    TextView txtVendorName = (TextView) v.findViewById(R.id.txtVendorName);
-
-                    // Getting reference to the TextView to set longitude
-                    TextView txtVendorContactNumber = (TextView) v.findViewById(R.id.txtVendorNumber);
-
-                    // Setting the latitude
-                    txtVendorName.setText(vendorModal.getfName()+ " "+ vendorModal.getlName());
-
-                    // Setting the longitude
-                    txtVendorContactNumber.setText(vendorModal.getMobile());
-                    RatingBar ratingBar = (RatingBar) v.findViewById(R.id.idRatingBar);
-                    ratingBar.setRating(vendorModal.getRating());
-
-                    // Returning the view containing InfoWindow contents
-                    return v;
+                    return null;
 
                 }
             });
         }
 
+
         // Add a marker in Sydney and move the camera
         //LatLng sydney = new LatLng(-34, 151);
         //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+    private Circle drawCircle(LatLng point, double radius){
+
+        // Instantiating CircleOptions to draw a circle around the marker
+        CircleOptions circleOptions = new CircleOptions();
+
+        // Specifying the center of the circle
+        circleOptions.center(point);
+
+        // Radius of the circle
+        circleOptions.radius(radius);
+
+        // Border color of the circle
+        circleOptions.strokeColor(ContextCompat.getColor(this, R.color.blue_500));
+
+        // Fill color of the circle
+        circleOptions.fillColor(ContextCompat.getColor(this, R.color.blue_500));
+
+        // Border width of the circle
+        circleOptions.strokeWidth(2);
+
+        // Adding the circle to the GoogleMap
+        if(mCircle!=null) mCircle.remove();
+       // if(latLng == null) return null;
+        Circle circle = mMap.addCircle(circleOptions);
+        return circle;
+
     }
     private void animateToShowAllMarker(List<Marker> markerList){
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -311,28 +358,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         int padding = 80; // offset from edges of the map in pixels
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
         mMap.animateCamera(cu);
-        getUpdatedLocation();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        getUpdatedLocation();
+                    }
+                });
+
+            }
+        }, 10 * 1000);
+
         //float zoomL = mMap.getCameraPosition().zoom;
         // zoom=CameraUpdateFactory.zoomTo(zoomL - 1);
         //mMap.animateCamera(zoom);
     }
     private void getUpdatedLocation(){
         String strIDs = null;
+        List<Integer> added = new ArrayList<Integer>();
         for(VendorModal vendorModal : mListDynamicVendors){
-            if(strIDs == null){
+            if(strIDs == null && !added.contains(vendorModal.getVendorId())){
                 strIDs = ""+vendorModal.getVendorId();
             }
             else{
-                strIDs = strIDs + "," + vendorModal.getVendorId();
+                if(!added.contains(vendorModal.getVendorId())) {
+                    strIDs = strIDs + "," + vendorModal.getVendorId();
+                }
             }
         }
 
         if(strIDs != null) {
-            final ProgressDialog progressDialog = FuntionUtils.showProgressSialog(this);
+            //final ProgressDialog progressDialog = FuntionUtils.showProgressSialog(this);
             mMongoUtil.getData(new AsyncResponse() {
                 @Override
                 public void processFinish(String output) {
-                    progressDialog.hide();
+                    //progressDialog.hide();
                     JSONObject object = null;
                     try {
                         object = new JSONObject(output);
@@ -431,10 +493,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 mMyPosMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("My current position").icon(BitmapDescriptorFactory.fromResource(R.drawable.greenpin)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
-               // mCircle = drawCircle(latLng,100);
-                if(mCircle!=null) {
-                    //MapUtils.getCircleIntoView(mMap, MapUtils.boundsWithCenterAndLatLngDistance(mCircle.getCenter(), (float) mCircle.getRadius(), (float) mCircle.getRadius()));
-                }
+               mCircle = drawCircle(latLng, 100);
             }
             if(isLaunchedFromLogin && mMyCurrentLocationObject ==  null){
                 mMyCurrentLocationObject = location;
@@ -506,28 +565,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            //mCircle = drawCircle(seekBar.getProgress());
-            if(mCircle!=null) {
-                //MapUtils.getCircleIntoView(mMap, MapUtils.boundsWithCenterAndLatLngDistance(mCircle.getCenter(), (float) mCircle.getRadius(), (float) mCircle.getRadius()));
-            }
+            int progress = seekBar.getProgress() * 3;
+            mCircle = drawCircle(mCircle.getCenter(), progress);
+
             //txt_seekbar_val.setText(String.format(Locale.getDefault(),"%d",seekBar.getProgress()));
         }
     };
 
-    private Circle drawCircle(int radius)
-    {
-        if(mCircle == null ) return null;
-        return drawCircle(mCircle.getCenter(),radius);
-    }
 
-    private Circle drawCircle(LatLng latLng, int radius)
-    {
-        if(mCircle!=null) mCircle.remove();
-        if(latLng == null) return null;
-        int radiusInMeters = MapUtils.convertMilesIntoMeters(radius);
-        return MapUtils.drawCircle(this, mMap, latLng, radiusInMeters);
 
-    }
     private List<VendorModal> parseVendorsResponse(String response, Place place){
         List<VendorModal> listVendorModel  = new ArrayList<VendorModal>();
         try {
@@ -576,9 +622,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         latitude = place.getLatLng().latitude;
                         longitude = place.getLatLng().longitude;
                     }
-
+                    listVendorsToShow.clear();
                     for(VendorModal vendorModal : listVendorModel){
-                       // mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(vendorModal.getLat()), Double.parseDouble(vendorModal.getLng()))).title(vendorModal.getfName()));
+                       //mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(vendorModal.getLat()), Double.parseDouble(vendorModal.getLng()))).title(vendorModal.getfName()));
                         float [] result = new float[1];
                         android.location.Location.distanceBetween(latitude, longitude, Double.parseDouble(vendorModal.getLat()), Double.parseDouble(vendorModal.getLng()), result);
                         if(result[0] <= Constants.KM_DISTANCE){
@@ -591,10 +637,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Marker marker = mListMarkersToShow.get(i);
                         marker.remove();
                     }
+                    if(mListMarkersToShow.size() == 0){
+                        //Toast.makeText(MapsActivity.this, "No records found for this location.", Toast.LENGTH_LONG).show();
+                    }
                     mListMarkersToShow.clear();
                     mListMarkersToShow.add(mMyPosMarker);
+                    mMap.clear();
+                    if(mMyPosMarker != null){
+                        mMap.addMarker(new MarkerOptions().position(mMyPosMarker.getPosition()).title(mMyPosMarker.getTitle()));
+                    }
+                    if(mCircle != null){
+                        drawCircle(mCircle.getCenter(), mCircle.getRadius());
+                    }
+
                     for(VendorModal vendorModal : listVendorsToShow) {
                         Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(vendorModal.getLat()), Double.parseDouble(vendorModal.getLng()))).title(vendorModal.getfName()));
+                        int categoryId = vendorModal.getVendorType();
+                        BitmapDescriptor bitmapDescriptor = null;
+                        switch (categoryId) {
+                            case 1:
+                                bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_marker_vegetable);
+                                break;
+                            case 2:
+                                bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_marker_auto);
+                                break;
+                            case 3:
+                                bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_marker_electrician);
+                                break;
+                            case 4:
+                                bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_marker_plumber);
+                                break;
+
+                        }
+                        if(bitmapDescriptor != null) {
+                            marker.setIcon(bitmapDescriptor);
+                        }
                         marker.setTag(vendorModal);
                         mListMarkersToShow.add(marker);
                         mMapMarkerObjectModel.put(marker.getTitle(), vendorModal);
