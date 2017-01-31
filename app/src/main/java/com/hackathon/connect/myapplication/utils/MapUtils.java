@@ -31,8 +31,8 @@ public class MapUtils {
         Circle circle = map.addCircle(new CircleOptions()
                 .center(latLng)
                 .radius(radius)
-                .strokeColor(ContextCompat.getColor(context, R.color.colorAccent))
-                .fillColor(ContextCompat.getColor(context, R.color.circleSolid)));
+                .strokeColor(ContextCompat.getColor(context, R.color.blue_500))
+                .fillColor(ContextCompat.getColor(context, R.color.blue_500_opac50)));
         circle.setStrokeWidth(3.0f);
         return circle;
 
