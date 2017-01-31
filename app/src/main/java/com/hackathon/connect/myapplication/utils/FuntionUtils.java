@@ -22,6 +22,7 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.hackathon.connect.myapplication.R;
 import com.hackathon.connect.myapplication.activities.BaseActivity;
 import com.hackathon.connect.myapplication.activities.LoginActivity;
+import com.hackathon.connect.myapplication.activities.MapsActivity;
 import com.hackathon.connect.myapplication.activities.PermissionsActivity;
 import com.hackathon.connect.myapplication.common.constants.Constants;
 import com.hackathon.connect.myapplication.helper.PermissionsHelper;
@@ -58,6 +59,25 @@ public class FuntionUtils {
                 }
             }
         });
+
+
+        AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
+    public static void showDialogForVendorEntry(final Activity activity) {
+        Resources resources = activity.getResources();
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
+        dialogBuilder.setTitle(resources.getString(R.string.entered));
+        dialogBuilder.setMessage(resources.getString(R.string.detailEntered));
+
+        dialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                MapsActivity.IS_POP_UP_VISIBLE = false;
+                dialog.cancel();
+            }
+        });
+
 
 
         AlertDialog alertDialog = dialogBuilder.create();

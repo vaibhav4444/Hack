@@ -76,6 +76,8 @@ import java.util.List;
 import java.util.Map;
 
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, ILocationUpdates {
 
@@ -106,6 +108,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private List<VendorModal> mListDynamicVendors;
     private Fragment mSearchFrag;
     private List<VendorModal> mNotifyArray;
+    private Timer t ;
+    public static boolean IS_POP_UP_VISIBLE = true;
 
 
     @Override
@@ -126,6 +130,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         chkPlumber = (CheckBox) findViewById(R.id.idChkPlumber);
         chkCobbler = (CheckBox) findViewById(R.id.idChkCobbler);
         chkAll =  (CheckBox) findViewById(R.id.idChkAll);
+        t = new Timer();
         mListMarkersToShow= new ArrayList<Marker>();
         listChk = new ArrayList<CheckBox>();
         listChk.add(chkVeg);
@@ -157,6 +162,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 LogUtil.i("TAG", "Place: " + place.getName());
                 mMap.clear();
                 mPlaceObject = place;
+                mMyCurrentLocationObject = null;
                 zoomToPosition(place.getLatLng(), place);
             }
 
@@ -199,6 +205,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
         if(strIds == null){
+            if(t != null)
+            {
+                t.cancel();
+            }
             mLinLoginCategory.setVisibility(View.VISIBLE);
             mHorView.setVisibility(View.GONE);
         }
@@ -358,18 +368,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         int padding = 80; // offset from edges of the map in pixels
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
         mMap.animateCamera(cu);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        getUpdatedLocation();
-                    }
-                });
 
-            }
-        }, 10 * 1000);
+        t.scheduleAtFixedRate(new TimerTask() {
+
+                                  @Override
+                                  public void run() {
+                                      //Called each time when 1000 milliseconds (1 second) (the period parameter)
+                                      runOnUiThread(new Runnable() {
+                                          @Override
+                                          public void run() {
+                                              getUpdatedLocation();
+                                          }
+                                      });
+                                  }
+
+                              },
+//Set how long before to start calling the TimerTask (in milliseconds)
+                0,
+//Set the amount of time between each execution (in milliseconds)
+                1000 * 20);
+
 
         //float zoomL = mMap.getCameraPosition().zoom;
         // zoom=CameraUpdateFactory.zoomTo(zoomL - 1);
@@ -505,8 +523,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
     }
-    public static void animateMarker(final GoogleMap map, final Marker marker, final LatLng toPosition,
-                                     final boolean hideMarker) {
+    public  void animateMarker(final GoogleMap map, final Marker marker, final LatLng toPosition,
+                                     final boolean hideMarker ) {
 
         final Handler handler = new Handler();
         final long start = SystemClock.uptimeMillis();
@@ -514,6 +532,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Point startPoint = proj.toScreenLocation(marker.getPosition());
         final LatLng startLatLng = proj.fromScreenLocation(startPoint);
         final long duration = 2500;
+        final double latitude = marker.getPosition().latitude;
+        final double longitude = marker.getPosition().longitude;
+
+
 
         final Interpolator interpolator = new LinearInterpolator();
 
@@ -537,6 +559,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         marker.setVisible(true);
                     }
                 }
+
+
+                //FuntionUtils.showDialogForVendorEntry(MapsActivity.this);
+                if(mMyCurrentLocationObject != null) {
+                    float [] result = new float[1];
+                    android.location.Location.distanceBetween(mMyCurrentLocationObject.getLatitude(), mMyCurrentLocationObject.getLongitude(), latitude, longitude, result);
+                    if(result[0] > 150){
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(!IS_POP_UP_VISIBLE) {
+                                    IS_POP_UP_VISIBLE = true;
+                                    FuntionUtils.showDialogForVendorEntry(MapsActivity.this);
+                                }
+                            }
+                        });
+
+                    }
+                }
+
             }
         });
     }
